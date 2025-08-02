@@ -17,15 +17,18 @@ export async function getTransactionsByUserId(req, res) {
 
 export async function createTransaction(req, res) {
   try {
-    const { title, amount, category, user_id } = req.body;
+    const { title, amount, category, user_id, created_at } = req.body;
 
     if (!title || !user_id || !category || amount === undefined) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    // Convert ISO timestamp to date-only format if provided
+    const createdAt = created_at ? new Date(created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+
     const transaction = await sql`
-      INSERT INTO transactions(user_id,title,amount,category)
-      VALUES (${user_id},${title},${amount},${category})
+      INSERT INTO transactions(user_id,title,amount,category,created_at)
+      VALUES (${user_id},${title},${amount},${category},${createdAt})
       RETURNING *
     `;
 
