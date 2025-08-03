@@ -15,13 +15,13 @@ const NoTransactionsFound = () => {
         color={COLORS.textLight}
         style={styles.emptyStateIcon}
       />
-      <Text style={styles.emptyStateTitle}>No transactions yet</Text>
+      <Text style={styles.emptyStateTitle}>Henüz işlem yok</Text>
       <Text style={styles.emptyStateText}>
-        Start tracking your finances by adding your first transaction
+        İlk işleminizi ekleyerek harcamalarınızı takip etmeye başlayın
       </Text>
       <TouchableOpacity style={styles.emptyStateButton} onPress={() => router.push("/create")}>
         <Ionicons name="add-circle" size={18} color={COLORS.white} />
-        <Text style={styles.emptyStateButtonText}>Add Transaction</Text>
+        <Text style={styles.emptyStateButtonText}>İşlem Ekle</Text>
       </TouchableOpacity>
     </View>
   );

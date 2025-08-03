@@ -72,13 +72,14 @@ export default function SignUpScreen() {
       // See https://clerk.com/docs/custom-flows/error-handling
       // for more info on error handling
       console.error(JSON.stringify(err, null, 2));
+      setError("Doğrulama kodu geçersiz veya süresi dolmuş.");
     }
   };
 
   if (pendingVerification) {
     return (
       <View style={styles.verificationContainer}>
-        <Text style={styles.verificationTitle}>Verify your email</Text>
+        <Text style={styles.verificationTitle}>E-postanızı doğrulayın</Text>
 
         {error ? (
           <View style={styles.errorBox}>
@@ -93,12 +94,12 @@ export default function SignUpScreen() {
         <TextInput
           style={[styles.verificationInput, error && styles.errorInput]}
           value={code}
-          placeholder="Enter your verification code"
+          placeholder="Doğrulama kodunuzu girin"
           placeholderTextColor="#9A8478"
           onChangeText={(code) => setCode(code)}
         />
         <TouchableOpacity onPress={onVerifyPress} style={styles.button}>
-          <Text style={styles.buttonText}>Verify</Text>
+          <Text style={styles.buttonText}>Doğrula</Text>
         </TouchableOpacity>
       </View>
     );
@@ -113,10 +114,10 @@ export default function SignUpScreen() {
     >
       <View style={styles.container}>
         <Image
-          source={require("../../assets/images/revenue-i2.png")}
+          source={require("../../assets/images/revenue-i4.png")}
           style={styles.illustration}
         />
-        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.title}>Hesap Oluştur</Text>
 
         {error ? (
           <View style={styles.errorBox}>
@@ -132,13 +133,13 @@ export default function SignUpScreen() {
           style={[styles.input, error && styles.errorInput]}
           autoCapitalize="none"
           value={emailAddress}
-          placeholder="Enter email"
+          placeholder="E-posta adresinizi girin"
           onChangeText={(email) => setEmailAddress(email)}
         />
         <TextInput
           style={[styles.input, error && styles.errorInput]}
           value={password}
-          placeholder="Enter password"
+          placeholder="Şifrenizi girin"
           secureTextEntry={true}
           onChangeText={(password) => setPassword(password)}
         />

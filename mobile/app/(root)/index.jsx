@@ -1,9 +1,9 @@
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
-import { Link, useRouter } from "expo-router";
+import { Link, useRouter, useFocusEffect } from "expo-router";
 import { Alert, FlatList, Image, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { SignOutButton } from "@/components/SignOutButton";
 import { useTransactions } from "../../hooks/useTransactions";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import PageLoader from "../../components/PageLoader";
 import { styles } from "../../assets/styles/home.styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,7 +16,7 @@ export default function Page() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
-  const { transactions, summary, isLoading, loadData, deleteTransaction } = useTransactions(
+  const { transactions, summary, monthlySummary, isLoading, loadData, deleteTransaction } = useTransactions(
     user.id
   );
 
@@ -26,62 +26,60 @@ export default function Page() {
     setRefreshing(false);
   };
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   const handleDelete = (id) => {
-    Alert.alert("Delete Transaction", "Are you sure you want to delete this transaction?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => deleteTransaction(id) },
+    Alert.alert("İşlem Sil", "Bu işlemi silmek istediğinizden emin misiniz?", [
+      { text: "İptal", style: "cancel" },
+      { text: "Sil", style: "destructive", onPress: () => deleteTransaction(id) },
     ]);
   };
 
   if (isLoading && !refreshing) return <PageLoader />;
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        {/* HEADER */}
-        <View style={styles.header}>
-          {/* LEFT */}
-          <View style={styles.headerLeft}>
-            <Image
-              source={require("../../assets/images/logo.png")}
-              style={styles.headerLogo}
-              resizeMode="contain"
-            />
-            <View style={styles.welcomeContainer}>
-              <Text style={styles.welcomeText}>Welcome,</Text>
-              <Text style={styles.usernameText}>
-                {user?.emailAddresses[0]?.emailAddress.split("@")[0]}
-              </Text>
-            </View>
-          </View>
-          {/* RIGHT */}
-          <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.addButton} onPress={() => router.push("/create")}>
-              <Ionicons name="add" size={20} color="#FFF" />
-              <Text style={styles.addButtonText}>Add</Text>
-            </TouchableOpacity>
-            <SignOutButton />
+  const ListHeader = () => (
+    <>
+      {/* HEADER */}
+      <View style={styles.header}>
+        {/* LEFT */}
+        <View style={styles.headerLeft}>
+         
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>Merhaba,</Text>
+            <Text style={styles.usernameText}>
+              Umut Kaan
+            </Text>
           </View>
         </View>
-
-        <BalanceCard summary={summary} />
-
-        <View style={styles.transactionsHeaderContainer}>
-          <Text style={styles.sectionTitle}>Recent Transactions</Text>
+        {/* RIGHT */}
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.addButton} onPress={() => router.push("/create")}>
+            <Ionicons name="add" size={20} color="#FFF" />
+            <Text style={styles.addButtonText}>Yeni İşlem</Text>
+          </TouchableOpacity>
+          <SignOutButton />
         </View>
       </View>
 
-      {/* FlatList is a performant way to render long lists in React Native. */}
-      {/* it renders items lazily — only those on the screen. */}
+      <BalanceCard summary={summary} monthlySummary={monthlySummary} />
+
+      <View style={styles.transactionsHeaderContainer}>
+        <Text style={styles.sectionTitle}>Son İşlemler</Text>
+      </View>
+    </>
+  );
+
+  return (
+    <View style={styles.container}>
       <FlatList
-        style={styles.transactionsList}
-        contentContainerStyle={styles.transactionsListContent}
+        style={styles.content}
         data={transactions}
         renderItem={({ item }) => <TransactionItem item={item} onDelete={handleDelete} />}
+        ListHeaderComponent={ListHeader}
         ListEmptyComponent={<NoTransactionsFound />}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

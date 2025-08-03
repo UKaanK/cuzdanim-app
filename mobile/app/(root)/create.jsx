@@ -4,25 +4,24 @@ import {
   Alert,
   TouchableOpacity,
   TextInput,
-  ActivityIndicatorBase,
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API_URL } from "../../constants/api";
 import { styles } from "../../assets/styles/create.styles";
 import { COLORS } from "../../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 
 const CATEGORIES = [
-  { id: "food", name: "Food & Drinks", icon: "fast-food" },
-  { id: "shopping", name: "Shopping", icon: "cart" },
-  { id: "transportation", name: "Transportation", icon: "car" },
-  { id: "entertainment", name: "Entertainment", icon: "film" },
-  { id: "bills", name: "Bills", icon: "receipt" },
-  { id: "income", name: "Income", icon: "cash" },
-  { id: "other", name: "Other", icon: "ellipsis-horizontal" },
+  { id: "food", name: "Yiyecek & İçecek", icon: "fast-food" },
+  { id: "shopping", name: "Alışveriş", icon: "cart" },
+  { id: "transportation", name: "Ulaşım", icon: "car" },
+  { id: "entertainment", name: "Eğlence", icon: "film" },
+  { id: "bills", name: "Faturalar", icon: "receipt" },
+  { id: "income", name: "Gelir", icon: "cash" },
+  { id: "other", name: "Diğer", icon: "ellipsis-horizontal" },
 ];
 
 const CreateScreen = () => {
@@ -31,21 +30,58 @@ const CreateScreen = () => {
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
+  const [displayAmount, setDisplayAmount] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isExpense, setIsExpense] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCreate = async () => {
-    // validations
-    if (!title.trim())
-      return Alert.alert("Error", "Please enter a transaction title");
-    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
-      Alert.alert("Error", "Please enter a valid amount");
-      return;
+  // Handle category selection when switching between income and expense.
+  useEffect(() => {
+    // If switching to income, automatically select the 'Gelir' category.
+    if (!isExpense) {
+      setSelectedCategory("Gelir");
+    } else {
+      // If switching to expense, clear any previous selection.
+      setSelectedCategory("");
+    }
+  }, [isExpense]);
+
+  const formatAmount = (text) => {
+    // 1. Sanitize the input: allow only digits and a single comma.
+    const sanitizedText = text.replace(/[^0-9,]/g, "");
+    const parts = sanitizedText.split(",");
+
+    // 2. Validate format: ensure at most one comma and two decimal places.
+    if (parts.length > 2 || (parts[1] && parts[1].length > 2)) {
+      return; // Exit if input is invalid
     }
 
-    if (!selectedCategory)
-      return Alert.alert("Error", "Please select a category");
+    // 3. Set the raw value for calculations (e.g., "150000.50")
+    const integerPart = parts[0] || "";
+    const decimalPart = parts[1];
+    const rawValue = integerPart + (decimalPart !== undefined ? `.${decimalPart}` : "");
+    setAmount(rawValue);
+
+    // 4. Format the integer part with thousand separators for display
+    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    // 5. Reconstruct the display string (e.g., "150.000,50")
+    const newDisplayAmount =
+      decimalPart !== undefined
+        ? `${formattedInteger},${decimalPart}`
+        : formattedInteger;
+
+    setDisplayAmount(newDisplayAmount);
+  };
+
+  const handleCreate = async () => {
+    // validations
+    if (!title.trim()) return Alert.alert("Hata", "Lütfen bir işlem başlığı girin");
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      Alert.alert("Hata", "Lütfen geçerli bir tutar girin");
+      return;
+    }
+    if (!selectedCategory) return Alert.alert("Hata", "Lütfen bir kategori seçin");
 
     setIsLoading(true);
     try {
@@ -58,29 +94,27 @@ const CreateScreen = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
         },
         body: JSON.stringify({
-          user_id: user.id,
-          title: title.trim(),
+          user_id: user.id.toString(),
+          title,
           amount: formattedAmount,
           category: selectedCategory,
-          created_at: new Date().toISOString(),
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         console.log(errorData);
-        throw new Error(errorData.error || "Failed to create transaction");
+        throw new Error(errorData.error || "İşlem oluşturulamadı");
       }
 
-      Alert.alert("Success", "Transaction created successfully");
+      Alert.alert("Başarılı", "İşlem başarıyla oluşturuldu");
       router.back();
     } catch (error) {
-      Alert.alert("Error", error.message || "Failed to create transaction");
+      Alert.alert("Hata", error.message || "İşlem oluşturulamadı");
       console.error("Error creating transaction:", error);
-    } finally { 
+    } finally {
       setIsLoading(false);
     }
   };
@@ -89,27 +123,17 @@ const CreateScreen = () => {
     <View style={styles.container}>
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>New Transaction</Text>
+        <Text style={styles.headerTitle}>Yeni İşlem</Text>
         <TouchableOpacity
-          style={[
-            styles.saveButtonContainer,
-            isLoading && styles.saveButtonDisabled,
-          ]}
+          style={[styles.saveButtonContainer, isLoading && styles.saveButtonDisabled]}
           onPress={handleCreate}
           disabled={isLoading}
         >
-          <Text style={styles.saveButton}>
-            {isLoading ? "Saving..." : "Save"}
-          </Text>
-          {!isLoading && (
-            <Ionicons name="checkmark" size={18} color={COLORS.primary} />
-          )}
+          <Text style={styles.saveButton}>{isLoading ? "Kaydediliyor..." : "Kaydet"}</Text>
+          {!isLoading && <Ionicons name="checkmark" size={18} color={COLORS.primary} />}
         </TouchableOpacity>
       </View>
 
@@ -126,13 +150,8 @@ const CreateScreen = () => {
               color={isExpense ? COLORS.white : COLORS.expense}
               style={styles.typeIcon}
             />
-            <Text
-              style={[
-                styles.typeButtonText,
-                isExpense && styles.typeButtonTextActive,
-              ]}
-            >
-              Expense
+            <Text style={[styles.typeButtonText, isExpense && styles.typeButtonTextActive]}>
+              Gider
             </Text>
           </TouchableOpacity>
 
@@ -147,27 +166,22 @@ const CreateScreen = () => {
               color={!isExpense ? COLORS.white : COLORS.income}
               style={styles.typeIcon}
             />
-            <Text
-              style={[
-                styles.typeButtonText,
-                !isExpense && styles.typeButtonTextActive,
-              ]}
-            >
-              Income
+            <Text style={[styles.typeButtonText, !isExpense && styles.typeButtonTextActive]}>
+              Gelir
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* AMOUNT CONTAINER */}
         <View style={styles.amountContainer}>
-          <Text style={styles.currencySymbol}>$</Text>
+          <Text style={styles.currencySymbol}>₺</Text>
           <TextInput
             style={styles.amountInput}
-            placeholder="0.00"
+            placeholder="0,00"
             placeholderTextColor={COLORS.textLight}
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="numeric"
+            value={displayAmount}
+            onChangeText={formatAmount}
+            keyboardType="decimal-pad"
           />
         </View>
 
@@ -181,7 +195,7 @@ const CreateScreen = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="Transaction Title"
+            placeholder="İşlem Başlığı"
             placeholderTextColor={COLORS.textLight}
             value={title}
             onChangeText={setTitle}
@@ -190,36 +204,29 @@ const CreateScreen = () => {
 
         {/* TITLE */}
         <Text style={styles.sectionTitle}>
-          <Ionicons name="pricetag-outline" size={16} color={COLORS.text} />{" "}
-          Category
+          <Ionicons name="pricetag-outline" size={16} color={COLORS.text} /> Kategori
         </Text>
 
         <View style={styles.categoryGrid}>
-          {CATEGORIES.map((category) => (
+          {CATEGORIES.filter((c) => (isExpense ? c.id !== "income" : c.id === "income")).map((category) => (
             <TouchableOpacity
               key={category.id}
               style={[
                 styles.categoryButton,
-                selectedCategory === category.name &&
-                  styles.categoryButtonActive,
+                selectedCategory === category.name && styles.categoryButtonActive,
               ]}
               onPress={() => setSelectedCategory(category.name)}
             >
               <Ionicons
                 name={category.icon}
                 size={20}
-                color={
-                  selectedCategory === category.name
-                    ? COLORS.white
-                    : COLORS.text
-                }
+                color={selectedCategory === category.name ? COLORS.white : COLORS.text}
                 style={styles.categoryIcon}
               />
               <Text
                 style={[
                   styles.categoryButtonText,
-                  selectedCategory === category.name &&
-                    styles.categoryButtonTextActive,
+                  selectedCategory === category.name && styles.categoryButtonTextActive,
                 ]}
               >
                 {category.name}

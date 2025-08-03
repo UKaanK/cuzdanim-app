@@ -12,6 +12,7 @@ export const useTransactions = (userId) => {
     expenses: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [monthlySummary, setMonthlySummary] = useState({ income: 0, expenses: 0 });
 
   // useCallback is used for performance reasons, it will memoize the function
   const fetchTransactions = useCallback(async () => {
@@ -19,6 +20,30 @@ export const useTransactions = (userId) => {
       const response = await fetch(`${API_URL}/transactions/${userId}`);
       const data = await response.json();
       setTransactions(data);
+
+      // Calculate monthly summary
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      let monthlyIncome = 0;
+      let monthlyExpenses = 0;
+
+      data.forEach((transaction) => {
+        const transactionDate = new Date(transaction.created_at);
+        if (
+          transactionDate.getMonth() === currentMonth &&
+          transactionDate.getFullYear() === currentYear
+        ) {
+          if (transaction.amount > 0) {
+            monthlyIncome += transaction.amount;
+          } else {
+            monthlyExpenses += transaction.amount;
+          }
+        }
+      });
+
+      setMonthlySummary({ income: monthlyIncome, expenses: monthlyExpenses });
     } catch (error) {
       console.error("Error fetching transactions:", error);
     }
@@ -62,5 +87,5 @@ export const useTransactions = (userId) => {
     }
   };
 
-  return { transactions, summary, isLoading, loadData, deleteTransaction };
+  return { transactions, summary, monthlySummary, isLoading, loadData, deleteTransaction };
 };

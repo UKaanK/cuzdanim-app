@@ -36,14 +36,14 @@ export default function Page() {
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
     } catch (err) {
-      if (err.errors?.[0]?.code==="form_password_incorrect") {
-        // If there are specific errors, set the first one as the error message
-        setError("Şifre Yanlış Lütfen Tekrar Deneyin.");
-      }else {
-        // For other errors, log them and set a generic error message
-        console.error(JSON.stringify(err, null, 2));
-        setError("Bir hata oluştu. Lütfen tekrar deneyin.");
-      }
+      const errorMessage =
+        err.errors?.[0]?.code === "form_identifier_not_found"
+          ? "Bu e-posta adresi ile kayıtlı bir kullanıcı bulunamadı."
+          : err.errors?.[0]?.code === "form_password_incorrect"
+          ? "Hatalı şifre. Lütfen tekrar deneyin."
+          : "Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.";
+      console.error(JSON.stringify(err, null, 2));
+      setError(errorMessage);
 
     }
   };
@@ -61,7 +61,7 @@ export default function Page() {
           source={require("../../assets/images/revenue-i4.png")}
           style={styles.illustration}
         />
-        <Text style={styles.title}>Hoşgeldiniz</Text>
+        <Text style={styles.title}>Hoş Geldiniz</Text>
 
         {error ? (
           <View style={styles.errorBox}>
@@ -88,10 +88,10 @@ export default function Page() {
           onChangeText={(password) => setPassword(password)}
         />
         <TouchableOpacity onPress={onSignInPress} style={styles.button}>
-          <Text style={styles.buttonText}>Devam Et</Text>
+          <Text style={styles.buttonText}>Giriş Yap</Text>
         </TouchableOpacity>
         <View style={styles.footerContainer}>
-          <Text style={styles.footerText}>Hesabınız Yok Mu ?</Text>
+          <Text style={styles.footerText}>Hesabınız yok mu?</Text>
           <TouchableOpacity onPress={() => router.push("/sign-up")}>
             <Text style={styles.linkText}>Kayıt Ol</Text>
           </TouchableOpacity>

@@ -9,3 +9,17 @@ export function formatDate(dateString) {
     day: "numeric",
   });
 }
+
+export function formatCurrency(amount) {
+  const amountFloat = parseFloat(amount);
+  if (isNaN(amountFloat)) {
+    return "₺0,00";
+  }
+
+  return new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency: "TRY",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amountFloat);
+}

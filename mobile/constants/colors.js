@@ -1,62 +1,69 @@
 // constants/colors.js
-const coffeeTheme = {
-  primary: "#8B593E",
-  background: "#FFF8F3",
-  text: "#4A3428",
-  border: "#E5D3B7",
-  white: "#FFFFFF",
-  textLight: "#9A8478",
-  expense: "#E74C3C",
-  income: "#2ECC71",
-  card: "#FFFFFF",
-  shadow: "#000000",
-};
 
-const forestTheme = {
-  primary: "#2E7D32",
-  background: "#E8F5E9",
-  text: "#1B5E20",
-  border: "#C8E6C9",
-  white: "#FFFFFF",
-  textLight: "#66BB6A",
-  expense: "#C62828",
-  income: "#388E3C",
-  card: "#FFFFFF",
-  shadow: "#000000",
-};
+// Modern color theme
+export const COLORS = {
+  // Base colors
+  primary: "#007AFF",    // New primary blue
+  secondary: "#005ecb",  // Darker shade of new primary
+  background: "#f8fafc", // Light gray
+  text: "#1e293b",       // Dark text
+  textLight: "#64748b",   // Light text
+  border: "#e2e8f0",     // Subtle border
+  white: "#ffffff",
+  
+  // Transaction colors
+  expense: "#ef4444",    // Red for expenses
+  income: "#10b981",     // Green for income
+  
+  // Card and shadow
+  card: "#ffffff",
+  shadow: "rgba(0, 0, 0, 0.05)",
+  
+  // Status colors
+  success: "#10b981",
+  error: "#ef4444",
+  warning: "#f59e0b",
+  info: "#007AFF",
+  disabled: "#94a3b8",
+  
+  // Gradient for buttons and effects
+  gradient: {
+    start: "#007AFF",
+    end: "#005ecb"
+  },
 
-const purpleTheme = {
-  primary: "#6A1B9A",
-  background: "#F3E5F5",
-  text: "#4A148C",
-  border: "#D1C4E9",
-  white: "#FFFFFF",
-  textLight: "#BA68C8",
-  expense: "#D32F2F",
-  income: "#388E3C",
-  card: "#FFFFFF",
-  shadow: "#000000",
-};
+  // Text hierarchy
+  text: {
+    primary: "#1e293b",
+    secondary: "#64748b",
+    disabled: "#94a3b8"
+  },
 
-const oceanTheme = {
-  primary: "#0277BD",
-  background: "#E1F5FE",
-  text: "#01579B",
-  border: "#B3E5FC",
-  white: "#FFFFFF",
-  textLight: "#4FC3F7",
-  expense: "#EF5350",
-  income: "#26A69A",
-  card: "#FFFFFF",
-  shadow: "#000000",
-};
+  // Background hierarchy
+  background: {
+    primary: "#f8fafc",
+    secondary: "#ffffff",
+    accent: "#007AFF"
+  },
 
-export const THEMES = {
-  coffee: coffeeTheme,
-  forest: forestTheme,
-  purple: purpleTheme,
-  ocean: oceanTheme,
-};
+  // Border hierarchy
+  border: {
+    primary: "#e2e8f0",
+    secondary: "#94a3b8"
+  },
 
-// 👇 change this to switch theme
-export const COLORS = THEMES.coffee;
+  // Button styles
+  button: {
+    primary: "#007AFF",
+    secondary: "#005ecb",
+    text: "#ffffff"
+  },
+
+  // Input styles
+  input: {
+    border: "#e2e8f0",
+    background: "#ffffff",
+    text: "#1e293b",
+    placeholder: "#64748b"
+  }
+};
